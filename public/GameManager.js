@@ -154,15 +154,25 @@ class GameManager {
   }
 
   checkCollision(playerMesh, obstacleMesh, obstaclePrevPosition, obstacleNewPosition) {
+    // If the obstacle is a jump ramp and player touches it, initiate jump
+    if (obstacleMesh.userData.type === 'jump') {
+      const playerBox = new THREE.Box3().setFromObject(playerMesh);
+      const obstacleBox = new THREE.Box3().setFromObject(obstacleMesh);
+      
+      if (playerBox.intersectsBox(obstacleBox)) {
+        this.player.initiateJump();
+        return false; // Don't count jump collisions as game over
+      }
+    }
+    
+    // Original collision detection for other obstacles
     const playerBox = new THREE.Box3().setFromObject(playerMesh);
     const obstacleBox = new THREE.Box3().setFromObject(obstacleMesh);
 
-    // Low-speed collision detection (bounding box)
     if (playerBox.intersectsBox(obstacleBox)) {
       return true;
     }
 
-    // High-speed collision detection (raycasting)
     const obstaclePath = new THREE.Ray(
       obstaclePrevPosition,
       new THREE.Vector3().subVectors(obstacleNewPosition, obstaclePrevPosition).normalize()
@@ -171,12 +181,8 @@ class GameManager {
     const distanceTraveled = obstaclePrevPosition.distanceTo(obstacleNewPosition);
     const intersection = obstaclePath.intersectBox(playerBox);
 
-    if (intersection && intersection.distance <= distanceTraveled) {
-      return true;
-    }
-
-    return false;
-  }
+    return intersection && intersection.distance <= distanceTraveled;
+}
 
 
   animate() {

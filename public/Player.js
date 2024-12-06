@@ -3,30 +3,55 @@
 class Player {
     // constructor- creates the variables for the player
     constructor(scene) {
-      // Player properties
+      // Existing properties
       this.playerSpeed = 0.3;
       this.moveLeft = false;
       this.moveRight = false;
       this.movementLimit = 20;
       this.forwardSpeed = 0.2;
+      
+      // New jump properties
+      this.isJumping = false;
+      this.jumpHeight = 0;
+      this.jumpVelocity = 0;
+      this.gravity = 0.015;
+      this.baseY = -1; // Ground level
   
-      // Create the player mesh
+      // Create the player mesh (same as before)
       const playerGeometry = new THREE.BoxGeometry(1, 2, 0.5);
       const playerMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
       this.mesh = new THREE.Mesh(playerGeometry, playerMaterial);
       this.mesh.castShadow = true;
-      this.mesh.position.set(0, -1, 0); // Lowered player position
+      this.mesh.position.set(0, this.baseY, 0);
       scene.add(this.mesh);
     }
     
-    // updates the position of the player
+    initiateJump() {
+      if (!this.isJumping) {
+        this.isJumping = true;
+        // Random jump velocity between 0.3 and 0.5
+        this.jumpVelocity = 0.3 + Math.random() * 0.2;
+      }
+    }
+    
     updatePosition() {
-      // Move the player forward
+      // Existing movement code
       this.mesh.position.z -= this.forwardSpeed;
-  
-      // Move the player left and right
       if (this.moveLeft) this.mesh.position.x -= this.playerSpeed;
       if (this.moveRight) this.mesh.position.x += this.playerSpeed;
+      
+      // Jump physics
+      if (this.isJumping) {
+        this.jumpVelocity -= this.gravity;
+        this.mesh.position.y += this.jumpVelocity;
+        
+        // Check if landed
+        if (this.mesh.position.y <= this.baseY) {
+          this.mesh.position.y = this.baseY;
+          this.isJumping = false;
+          this.jumpVelocity = 0;
+        }
+      }
   
       // Keep the player within bounds
       this.mesh.position.x = THREE.MathUtils.clamp(
@@ -35,12 +60,12 @@ class Player {
         this.movementLimit
       );
     }
-  
-    // resets the position of the player (when game resets)
+    
     resetPosition() {
-      this.mesh.position.set(0, -1, 0);
+      this.mesh.position.set(0, this.baseY, 0);
+      this.isJumping = false;
+      this.jumpVelocity = 0;
     }
-
   
     // handles the keydown event, triggering movement
     handleKeyDown(event) {
