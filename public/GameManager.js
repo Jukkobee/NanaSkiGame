@@ -27,7 +27,7 @@ class GameManager {
     this.score = 0;
     this.gameStartTime = Date.now(); // When the game starts
     this.lastScoreUpdateTime = Date.now(); // Last time score was updated
-    this.speedIncreaseDuration = 120000; // 120 seconds in milliseconds
+    this.speedIncreaseDuration = 100000; // 100 seconds in milliseconds
     this.initialPlayerSpeed = 0.2; // Initial forward speed
     this.maxSpeedMultiplier = 6; // Max multiplier for speed
     this.obstacleSpeed = 0.2; // Base obstacle speed
