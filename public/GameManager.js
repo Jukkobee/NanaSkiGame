@@ -1,4 +1,3 @@
-//added a comment
 import { Player } from './Player.js';
 import { Obstacle } from './Obstacle.js';
 import { Cliffs } from './Cliffs.js';
