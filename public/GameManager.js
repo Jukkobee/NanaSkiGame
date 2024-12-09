@@ -187,10 +187,11 @@ class GameManager {
     this.preSpawnObstacles();
   }
 
-  checkCollision(playerMesh, obstacleMesh, obstaclePrevPosition, obstacleNewPosition) {
-    if (obstacleMesh.userData.type === 'jump') {
+  checkCollision(playerMesh, obstacle, obstaclePrevPosition, obstacleNewPosition) {
+    // First check if it's a jump ramp
+    if (obstacle.userData.type === 'jump') {
       const playerBox = new THREE.Box3().setFromObject(playerMesh);
-      const obstacleBox = new THREE.Box3().setFromObject(obstacleMesh);
+      const obstacleBox = new THREE.Box3().setFromObject(obstacle);
       
       if (playerBox.intersectsBox(obstacleBox)) {
         this.player.initiateJump();
@@ -198,8 +199,10 @@ class GameManager {
       }
     }
 
+    // For other obstacles, use the hitbox if available
+    const collisionMesh = obstacle.hitboxMesh || obstacle;
     const playerBox = new THREE.Box3().setFromObject(playerMesh);
-    const obstacleBox = new THREE.Box3().setFromObject(obstacleMesh);
+    const obstacleBox = new THREE.Box3().setFromObject(collisionMesh);
 
     if (playerBox.intersectsBox(obstacleBox)) {
       return true;
