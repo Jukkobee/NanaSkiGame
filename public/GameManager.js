@@ -46,13 +46,13 @@ class GameManager {
 
     // Set up the camera
     this.camera = new THREE.PerspectiveCamera(
-      90,
+      75,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     );
-    this.camera.position.set(0, 3, 15);
-    this.camera.lookAt(0, -2, 0);
+    this.camera.position.set(0, 3.5, 9);
+    this.camera.lookAt(0, -1, 0);
 
     // Set up the renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
