@@ -1,37 +1,54 @@
-// Obstacle.js
-
 class Obstacle {
-  constructor(scene, movementLimit, playerPositionZ, spawnDistance, offset = 0) {
+  constructor(scene, movementLimit, playerPositionZ, spawnDistance, modelsLoader, offset = 0) {
     let obstacle;
-    // Add 'jump' as a new obstacle type
-    const obstacleType = Math.random() < 0.33 ? 'cube' : 
-                        Math.random() < 0.66 ? 'cone' : 'jump';
+    const obstacleType = Math.random() < 0.33 ? 'tree' : 
+                        Math.random() < 0.66 ? 'rock' : 'jump';
 
-    if (obstacleType === 'cube') {
-      const obstacleGeometry = new THREE.BoxGeometry(1, 1, 1);
-      const obstacleMaterial = new THREE.MeshLambertMaterial({ color: 0x808080 });
-      obstacle = new THREE.Mesh(obstacleGeometry, obstacleMaterial);
-    } else if (obstacleType === 'cone') {
-      const obstacleGeometry = new THREE.ConeGeometry(0.5, 2, 16);
-      const obstacleMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
-      obstacle = new THREE.Mesh(obstacleGeometry, obstacleMaterial);
+    if (obstacleType === 'tree' || obstacleType === 'rock') {
+      // Get the corresponding model
+      const model = modelsLoader.getModel(obstacleType);
+      if (model) {
+        obstacle = model.clone();
+        
+        // Increased scale values significantly
+        if (obstacleType === 'tree') {
+          const scale = 2.0; // Increased from 0.5
+          obstacle.scale.set(scale, scale, scale);
+        } else { // rock
+          const scale = 1.5; // Increased from 0.3
+          obstacle.scale.set(scale, scale, scale);
+        }
+      } else {
+        // Fallback to larger geometric shapes
+        console.warn(`${obstacleType} model not loaded, using fallback geometry`);
+        if (obstacleType === 'tree') {
+          const obstacleGeometry = new THREE.ConeGeometry(1.0, 4, 16); // Increased size
+          const obstacleMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
+          obstacle = new THREE.Mesh(obstacleGeometry, obstacleMaterial);
+        } else {
+          const obstacleGeometry = new THREE.BoxGeometry(2, 2, 2); // Increased size
+          const obstacleMaterial = new THREE.MeshLambertMaterial({ color: 0x808080 });
+          obstacle = new THREE.Mesh(obstacleGeometry, obstacleMaterial);
+        }
+      }
     } else { // jump ramp
       const rampGeometry = new THREE.BoxGeometry(4, 0.5, 2);
       const rampMaterial = new THREE.MeshLambertMaterial({ color: 0xffd700 });
       obstacle = new THREE.Mesh(rampGeometry, rampMaterial);
-      // Changed rotation to make ramp point upward in player's direction
-      obstacle.rotation.x = Math.PI / 8; // Changed from -Math.PI/8 to Math.PI/8
-      // Move the ramp's position slightly forward to align with rotation
+      obstacle.rotation.x = Math.PI / 8;
       obstacle.position.z += 1;
     }
 
     obstacle.castShadow = true;
-    obstacle.userData.type = obstacleType; // Store the type for collision detection
+    obstacle.userData.type = obstacleType;
 
     obstacle.position.x = (Math.random() - 0.5) * movementLimit * 2;
     obstacle.position.y = obstacleType === 'jump' ? -2 : -1;
     obstacle.position.z = playerPositionZ - spawnDistance + offset;
 
+    // Create collision box
+    this.collisionBox = new THREE.Box3().setFromObject(obstacle);
+    
     scene.add(obstacle);
     this.mesh = obstacle;
   }
